@@ -1,0 +1,19 @@
+{
+  "time": "2020-02-23 21:46:30.484544",
+  "protocol": 40,
+  "model": "Acurite-5n1",
+  "subtype": 49,
+  "id": 362,
+  "channel": "A",
+  "sequence_num": 2,
+  "battery_ok": 1,
+  "wind_avg_km_h": 0.000,
+  "wind_dir_deg": 67.500,
+  "rain_mm": 3295.656,
+  "mic": "CHECKSUM",
+  "mod": "ASK",
+  "freq": 433.982,
+  "rssi": -0.057,
+  "snr": 4.331,
+  "noise": -4.388
+}
