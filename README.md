@@ -11,7 +11,7 @@ adapted to others if needed.
 
 ## Usage 
 
-TBD
+TODO
 
 ## License
 
