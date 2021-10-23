@@ -1,6 +1,7 @@
 package com.github.mkbaldwin.weatherpi.persistence
 
 import com.github.mkbaldwin.weatherpi.util.celsiusToFahrenheit
+import com.github.mkbaldwin.weatherpi.util.fahrenheitToCelsius
 import com.influxdb.client.domain.WritePrecision
 import com.influxdb.client.kotlin.InfluxDBClientKotlinFactory
 import com.influxdb.client.kotlin.QueryKotlinApi
@@ -22,14 +23,27 @@ private val writeApi = client.getWriteKotlinApi();
 private val queryClient = client.getQueryKotlinApi()
 
 // #####################################################################################################################
-suspend fun recordTemperature(tempC: Double, timestamp: Long) = with(Point.measurement("Temperature")) {
-    addField("value_c", tempC)
-    addField("value_f", celsiusToFahrenheit(tempC))
-    time(timestamp, WritePrecision.MS)
-    writeApi.writePoint(this)
+suspend fun recordTemperature(tempC: Double?, tempF: Double?,  timestamp: Long) = with(Point.measurement("Temperature")) {
+    var persist = false
+    if(tempF != null) {
+        addField("value_c", fahrenheitToCelsius(tempF))
+        addField("value_f", tempF)
+        persist = true
+    }
+    else if (tempC != null) {
+        addField("value_c", tempC)
+        addField("value_f", celsiusToFahrenheit(tempC))
+        persist = true
+    }
+
+    if(persist) {
+        time(timestamp, WritePrecision.MS)
+        writeApi.writePoint(this)
+    }
 }
 
 // #####################################################################################################################
+// TODO: What if this is mi_h instead of km_h
 suspend fun recordWind(windSpeedKmh: Double, windDirection: Double?, timestamp: Long) =
     with(Point.measurement("Wind")) {
         addField("speed_kmh", windSpeedKmh)
@@ -54,6 +68,7 @@ suspend fun recordRain(rainMm: Double, timestamp: Long) {
 
     println("previousRainTotal: $previousRainTotal")
 
+    //TODO: What if this is rain_in instead of rain_mm
     with(Point.measurement("Rain")) {
         addField("cumulative_mm", rainMm)
         time(timestamp, WritePrecision.MS)

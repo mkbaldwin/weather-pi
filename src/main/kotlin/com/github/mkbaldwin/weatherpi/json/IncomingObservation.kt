@@ -21,13 +21,19 @@ data class IncomingObservation(
     val windDirection: Double? = null,
 
     @get:JsonProperty("temperature_C")
-    val temperature: Double? = null,
+    val temperatureC: Double? = null,
+
+    @get:JsonProperty("temperature_F")
+    val temperatureF: Double? = null,
 
     @get:JsonProperty("humidity")
     val humidity: Int? = null,
 
     @get:JsonProperty("rain_mm")
-    val rain: Double? = null
+    val rain: Double? = null,
+
+    @get:JsonProperty("sequence")
+    val sequenceNum: Int? = null
 ) {
     fun getTimeInstant(): Instant = parseToInstant(time)
 
