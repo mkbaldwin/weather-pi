@@ -17,6 +17,9 @@ fun main() {
             processObservation(input)
         }
 
+        // Keep the loop from running so tightly and consuming the CPU core. Since this is probably going on a PI Zero W
+        // it is important not to consume the only CPU core too much. Not sure if there is a better way to handle this
+        // when reading from STDIN.
         Thread.sleep(100L)
     }
 }
@@ -41,7 +44,7 @@ private fun processObservation(observationJson: String) {
             recordHumidity(it, time)
         }
 
-        observation.rain?.let { it ->
+        observation.rainMm?.let { it ->
             recordRain(it, time)
         }
     }
