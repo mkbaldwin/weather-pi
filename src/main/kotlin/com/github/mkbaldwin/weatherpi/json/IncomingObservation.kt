@@ -15,7 +15,10 @@ data class IncomingObservation(
     val time: String,
 
     @get:JsonProperty("wind_avg_km_h")
-    val windSpeed: Double? = null,
+    val windSpeedKmh: Double? = null,
+
+    @get:JsonProperty("wind_avg_mi_h")
+    val windSpeedMph: Double? = null,
 
     @get:JsonProperty("wind_dir_deg")
     val windDirection: Double? = null,

@@ -36,8 +36,9 @@ private fun processObservation(observationJson: String) {
             recordTemperature(observation.temperatureC, observation.temperatureF, time)
         }
 
-        observation.windSpeed?.let { it ->
-            recordWind(it, observation.windDirection, time)
+        // The sensor seems to be able to report either km/h or mi/h so handle both
+        if(observation.windSpeedKmh != null || observation.windSpeedMph != null) {
+            recordWind(observation.windSpeedKmh, observation.windSpeedMph, observation.windDirection, time)
         }
 
         observation.humidity?.let {

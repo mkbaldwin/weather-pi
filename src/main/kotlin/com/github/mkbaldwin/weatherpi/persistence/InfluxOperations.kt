@@ -2,6 +2,8 @@ package com.github.mkbaldwin.weatherpi.persistence
 
 import com.github.mkbaldwin.weatherpi.util.celsiusToFahrenheit
 import com.github.mkbaldwin.weatherpi.util.fahrenheitToCelsius
+import com.github.mkbaldwin.weatherpi.util.kilometersToMiles
+import com.github.mkbaldwin.weatherpi.util.milesToKilometers
 import com.influxdb.client.domain.WritePrecision
 import com.influxdb.client.kotlin.InfluxDBClientKotlinFactory
 import com.influxdb.client.kotlin.QueryKotlinApi
@@ -19,7 +21,7 @@ private const val influxHost = "http://localhost:8086"
 
 // Create the connection to influx for all the queries to use.
 private val client = InfluxDBClientKotlinFactory.create(influxHost, influxToken.toCharArray(), influxOrg, influxBucket)
-private val writeApi = client.getWriteKotlinApi();
+private val writeApi = client.getWriteKotlinApi()
 private val queryClient = client.getQueryKotlinApi()
 
 // #####################################################################################################################
@@ -44,12 +46,26 @@ suspend fun recordTemperature(tempC: Double?, tempF: Double?,  timestamp: Long) 
 
 // #####################################################################################################################
 // TODO: What if this is mi_h instead of km_h
-suspend fun recordWind(windSpeedKmh: Double, windDirection: Double?, timestamp: Long) =
+suspend fun recordWind(windSpeedKmh: Double?, windSpeedMph: Double?, windDirection: Double?, timestamp: Long) =
     with(Point.measurement("Wind")) {
-        addField("speed_kmh", windSpeedKmh)
-        time(timestamp, WritePrecision.MS)
-        windDirection?.let { addField("direction", it) }
-        writeApi.writePoint(this)
+        var persist = false
+        if(windSpeedKmh != null) {
+            addField("speed_kmh", windSpeedKmh)
+            addField("speed_mph", kilometersToMiles(windSpeedKmh))
+            persist = true
+        }
+        else if(windSpeedMph != null) {
+            addField("speed_kmh", milesToKilometers(windSpeedMph))
+            addField("speed_mph", windSpeedMph)
+            persist = true
+        }
+
+        if(persist) {
+            time(timestamp, WritePrecision.MS)
+            windDirection?.let { addField("direction", it) }
+            writeApi.writePoint(this)
+        }
+
     }
 
 // #####################################################################################################################
@@ -76,7 +92,7 @@ suspend fun recordRain(rainMm: Double, timestamp: Long) {
         // Now we want to calculate the rain accumulated since the last measurement (if there was a last measurement).
         // TODO: This code assumes the value will NOT rollover back to zero. It could... so this needs to be handled
         // TODO: in the future. Not sure what the maximum observation is from the gauge.
-        previousRainTotal?.let { prevRainTotal ->
+        previousRainTotal.let { prevRainTotal ->
             val rainInterval = rainMm - prevRainTotal
             addField("interval_mm", rainInterval)
         }
@@ -87,7 +103,7 @@ suspend fun recordRain(rainMm: Double, timestamp: Long) {
 
 // #####################################################################################################################
 @OptIn(ExperimentalCoroutinesApi::class)
-suspend fun queryLatestRainTotal(): Double? {
+suspend fun queryLatestRainTotal(): Double {
     val query = """
         from(bucket: "$influxBucket")
           |> range(start: -1w)
