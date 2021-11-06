@@ -9,6 +9,9 @@ import java.time.Instant
 
 private val incomingDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
+/**
+ * Represents a weather observation coming from the weather station.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class IncomingObservation(
     @get:JsonProperty("time")

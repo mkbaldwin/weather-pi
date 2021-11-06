@@ -1,5 +1,8 @@
 package com.github.mkbaldwin.weatherpi.conf
 
+/**
+ * Represent the configuration details for the application.
+ */
 data class Configuration(
     val influxHost: String,
     val influxBucket: String,

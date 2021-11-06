@@ -70,15 +70,20 @@ private fun processObservation(observationJson: String, influxOperations: Influx
 
         // The sensor seems to be able to report either km/h or mi/h so handle both
         if (observation.windSpeedKmh != null || observation.windSpeedMph != null) {
-            influxOperations.recordWind(observation.windSpeedKmh, observation.windSpeedMph, observation.windDirection, time)
+            influxOperations.recordWind(
+                observation.windSpeedKmh,
+                observation.windSpeedMph,
+                observation.windDirection,
+                time
+            )
         }
 
         observation.humidity?.let {
             influxOperations.recordHumidity(it, time)
         }
 
-        observation.rainMm?.let { it ->
-            influxOperations.recordRain(it, time)
+        if (observation.rainMm != null && observation.rainIn != null) {
+            influxOperations.recordRain(observation.rainMm, observation.rainIn, time)
         }
     }
 }

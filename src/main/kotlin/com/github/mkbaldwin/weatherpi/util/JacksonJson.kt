@@ -16,4 +16,9 @@ public val objectMapper = ObjectMapper().registerModule(
         .build()
 )
 
+/**
+ * Deserialize the provided JSON value into a Kotlin object.
+ *
+ * @param json JSON as a String.
+ */
 inline fun <reified T> deserialize(json: String): T = objectMapper.readValue<T>(json)
