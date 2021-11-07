@@ -12,9 +12,10 @@ repositories {
 
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.5.31'
-    implementation 'com.influxdb:influxdb-client-kotlin:3.3.0'
+    implementation 'com.influxdb:influxdb-client-kotlin:3.4.0'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0'
     implementation 'org.apache.commons:commons-math3:3.6.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-cli:0.3.2'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

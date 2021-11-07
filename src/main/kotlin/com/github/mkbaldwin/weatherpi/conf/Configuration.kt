@@ -7,5 +7,7 @@ data class Configuration(
     val influxHost: String,
     val influxBucket: String,
     val influxOrg: String,
-    val influxToken: String
+    val influxToken: String,
+    val barometerEnable: Boolean,
+    val barometerIntervalMs: Long
 )

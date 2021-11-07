@@ -2,6 +2,7 @@ package com.github.mkbaldwin.weatherpi.json
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.core.JsonParseException
 import com.github.mkbaldwin.weatherpi.util.deserialize
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -53,4 +54,11 @@ data class IncomingObservation(
 }
 
 
-fun deserializeIncomingObservation(json: String) = deserialize<IncomingObservation>(json)
+fun deserializeIncomingObservation(json: String): IncomingObservation?{
+    try {
+        return deserialize<IncomingObservation>(json)
+    }
+    catch (ex: JsonParseException) {
+        return null
+    }
+}
