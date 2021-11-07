@@ -8,27 +8,30 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import kotlinx.coroutines.*
+import mu.KotlinLogging
 import java.io.FileInputStream
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.Executors
 
+private val logger = KotlinLogging.logger {}
 
 // #####################################################################################################################
 // #####################################################################################################################
 // #####################################################################################################################
 fun main(args: Array<String>): Unit = runBlocking {
+    logger.info { "Starting application..." }
     val configuration = loadConfiguration(args)
     val influxOperations = InfluxOperations(configuration)
 
     // If we have a barometric pressure sensor then we want to start a separate coroutine to read that sensor
     if (configuration.barometerEnable) {
         launch {
-            println("Enabling barometric pressure sensor. (read interval ${configuration.barometerIntervalMs}ms)")
+            logger.info { "Enabling barometric pressure sensor. (read interval ${configuration.barometerIntervalMs}ms)" }
             while (true) {
-                println("Read barometer")
+                logger.info { "Read barometer" }
                 delay(configuration.barometerIntervalMs)
-                println("after")
+                logger.info { "after" }
             }
         }
 
@@ -73,6 +76,7 @@ private fun loadConfiguration(args: Array<String>): Configuration {
     ).default(300)
 
     parser.parse(args)
+
     // Load the configuration file from the specified path.
     val inputStream = FileInputStream(configFile)
     return with(Properties()) {
@@ -92,12 +96,12 @@ private fun loadConfiguration(args: Array<String>): Configuration {
 // #####################################################################################################################
 // #####################################################################################################################
 private suspend fun processObservation(observationJson: String, influxOperations: InfluxOperations) {
-    println("Received: $observationJson")
+    logger.info{"Received: $observationJson"}
     val observation = deserializeIncomingObservation(observationJson)
     val time = Instant.now().toEpochMilli()
 
     if (observation == null) {
-        println("Received invalid observation data: $observationJson")
+        logger.info{"Received invalid observation data: $observationJson"}
         return
     }
 
@@ -125,5 +129,4 @@ private suspend fun processObservation(observationJson: String, influxOperations
     if (observation.rainMm != null && observation.rainIn != null) {
         influxOperations.recordRain(observation.rainMm, observation.rainIn, time)
     }
-
 }

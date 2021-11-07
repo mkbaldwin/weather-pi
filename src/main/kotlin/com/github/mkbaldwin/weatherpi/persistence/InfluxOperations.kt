@@ -11,6 +11,10 @@ import com.influxdb.client.write.Point
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.first
+import mu.KotlinLogging
+
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Provides operations for adding, querying data in the influx database.
@@ -119,7 +123,7 @@ class InfluxOperations(configuration: Configuration) {
 
         val previousRainTotal = queryLatestRainTotal()
 
-        println("previousRainTotal: $previousRainTotal")
+        logger.debug { "previousRainTotal: $previousRainTotal" }
 
         val currentRainMm = when {
             rainMm != null -> rainMm
