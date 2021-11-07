@@ -12,6 +12,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.first
 import mu.KotlinLogging
+import java.lang.Exception
 
 
 private val logger = KotlinLogging.logger {}
@@ -62,7 +63,7 @@ class InfluxOperations(configuration: Configuration) {
 
             if (persist) {
                 time(timestamp, WritePrecision.MS)
-                writeApi.writePoint(this)
+                writePoint(this)
             }
         }
 
@@ -90,7 +91,7 @@ class InfluxOperations(configuration: Configuration) {
             if (persist) {
                 time(timestamp, WritePrecision.MS)
                 windDirection?.let { addField("direction", it) }
-                writeApi.writePoint(this)
+                writePoint(this)
             }
         }
 
@@ -104,7 +105,7 @@ class InfluxOperations(configuration: Configuration) {
     suspend fun recordHumidity(humidity: Int, timestamp: Long) = with(Point.measurement("Humidity")) {
         addField("value", humidity)
         time(timestamp, WritePrecision.MS)
-        writeApi.writePoint(this)
+        writePoint(this)
     }
 
     /**
@@ -145,7 +146,7 @@ class InfluxOperations(configuration: Configuration) {
                 addField("interval_in", millimetersToInches(rainIntervalMm))
             }
 
-            writeApi.writePoint(this)
+            writePoint(this)
         }
     }
 
@@ -165,10 +166,15 @@ class InfluxOperations(configuration: Configuration) {
 
         val results = queryClient.query(query)
 
-//    if (results.isEmpty) {
-//        return null
-//    }
-
         return results.consumeAsFlow().first().value as Double
+    }
+
+    private suspend fun writePoint(point: Point) {
+        try {
+            writeApi.writePoint(point)
+        }
+        catch (ex: Exception) {
+            logger.error(ex) { "Failed to write data to influxdb." }
+        }
     }
 }
