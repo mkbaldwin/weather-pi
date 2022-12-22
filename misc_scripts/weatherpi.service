@@ -1,0 +1,9 @@
+[Unit]
+Description=WeatherPi
+
+[Service]
+Type=simple
+ExecStart=/opt/weather/start-weather.sh
+
+[Install]
+WantedBy=multi-user.target
