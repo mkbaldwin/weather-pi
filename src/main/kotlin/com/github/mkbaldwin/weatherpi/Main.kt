@@ -1,6 +1,7 @@
 package com.github.mkbaldwin.weatherpi
 
 import com.github.mkbaldwin.weatherpi.conf.Configuration
+import com.github.mkbaldwin.weatherpi.json.deserializeIncomingBarometer
 import com.github.mkbaldwin.weatherpi.json.deserializeIncomingObservation
 import com.github.mkbaldwin.weatherpi.persistence.*
 import kotlinx.cli.ArgParser
@@ -13,6 +14,7 @@ import java.io.FileInputStream
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger {}
 
@@ -30,6 +32,15 @@ fun main(args: Array<String>): Unit = runBlocking {
             logger.info { "Enabling barometric pressure sensor. (read interval ${configuration.barometerIntervalMs}ms)" }
             while (true) {
                 logger.info { "Read barometer" }
+
+                val process = ProcessBuilder(configuration.barometerCommand).start()
+                process.inputStream.reader(Charsets.UTF_8).use {
+                    processBarometerObservation(it.readText(), influxOperations)
+                }
+                withContext(Dispatchers.IO) {
+                    process.waitFor(30, TimeUnit.SECONDS)
+                }
+
                 delay(configuration.barometerIntervalMs)
                 logger.info { "after" }
             }
@@ -72,6 +83,7 @@ private fun loadConfiguration(args: Array<String>): Configuration {
     )
     val barometerInterval by parser.option(
         ArgType.Int,
+        shortName = "i",
         description = "Interval for reading the barometer in seconds."
     ).default(300)
 
@@ -87,9 +99,27 @@ private fun loadConfiguration(args: Array<String>): Configuration {
             getProperty("influx.org"),
             getProperty("influx.token"),
             barometerEnabled ?: false,
-            (barometerInterval * 1000).toLong()
+            (barometerInterval * 1000).toLong(),
+            getProperty("barometer.cmd")
         )
     }
+}
+
+// #####################################################################################################################
+// #####################################################################################################################
+// #####################################################################################################################
+private suspend fun processBarometerObservation(observationJson: String, influxOperations: InfluxOperations) {
+    logger.info { "Received: $observationJson" }
+    val observation = deserializeIncomingBarometer(observationJson)
+    val time = Instant.now().toEpochMilli()
+
+    if (observation == null) {
+        logger.info{"Received invalid observation data from barometer: $observationJson"}
+        return
+    }
+
+    influxOperations.recordPressure(observation.pressureHpa,observation.sensorTempC, time)
+
 }
 
 // #####################################################################################################################
@@ -104,6 +134,8 @@ private suspend fun processObservation(observationJson: String, influxOperations
         logger.info{"Received invalid observation data: $observationJson"}
         return
     }
+
+    //TODO: Need to filter out duplicate records (look at sequence number)?
 
 
     // It seems that sometimes the receiver can report in C or F (maybe some setting?) either way

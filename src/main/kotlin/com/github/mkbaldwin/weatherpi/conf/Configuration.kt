@@ -9,5 +9,6 @@ data class Configuration(
     val influxOrg: String,
     val influxToken: String,
     val barometerEnable: Boolean,
-    val barometerIntervalMs: Long
+    val barometerIntervalMs: Long,
+    val barometerCommand: String
 )

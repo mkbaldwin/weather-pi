@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.5.10'
     id 'application'
+    id "nebula.ospackage" version "9.0.0"
 }
 
 group 'com.github.mkbaldwin'
@@ -31,4 +32,13 @@ application {
 
 test {
     useJUnitPlatform()
+}
+
+task bundleDebInstaller(type: Deb, group: "distribution") {
+    requires("openjdk-17-jre-headless")
+    requires("rtl-433")
+
+    from("build/install") {
+        into "/opt"
+    }
 }

@@ -108,6 +108,13 @@ class InfluxOperations(configuration: Configuration) {
         writePoint(this)
     }
 
+    suspend fun recordPressure(pressureHpa: Double, sensorTempC: Double, timestamp: Long) = with(Point.measurement("Pressure")) {
+        addField("pressure_hpa", pressureHpa)
+        addField("sensor_temp_c", sensorTempC)
+        time(timestamp, WritePrecision.MS)
+        writePoint(this)
+    }
+
     /**
      * Record a rainfall observation.
      *
