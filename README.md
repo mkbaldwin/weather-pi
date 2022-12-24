@@ -34,6 +34,8 @@ as it is compatible with the rtl_433 package.
     of 0, 1, 2. This is presumably done as redundancy in case the first transmission is interrupted. 
     This code currently does NOT deduplicate the received data. So, you will get three entries in 
     InfluxDB for each observation. 
+  * Yes, I know I committed my token for InfluxDB authentication, but it is just for a local
+    instance on my network when the Pi is running so... 
 
 ## Barometric Pressure
 
