@@ -44,6 +44,27 @@ not the external unit. Therefore the values are never broadcast to pick up. As a
 to find an alternative way to get this information. My solution was a BMP280 board that I could
 connect to the PI via SPI. A schematic of my solution is [here](barometer_connections_spi.png)
 
+## Software Architecture
+
+```
+┌──────────────┐             ┌──────────────┐              ┌──────────────┐
+│              │    stdin    │              │              │              │
+│   rtl_433    │────────────▶│  weatherpi   │─────────────▶│   InfluxDB   │
+│              │             │              │              │              │
+└──────────────┘             └──────────────┘              └──────────────┘
+                                     ▲                                     
+                                     │                                     
+                                     │ ProcessBuilder                      
+                                     │      Call                           
+                                     │                                     
+                                     ▼                                     
+                          ┌─────────────────────┐                          
+                          │                     │                          
+                          │  read-barometer.py  │                          
+                          │                     │                          
+                          └─────────────────────┘                          
+```
+
 ## Usage 
 
 TODO: Add instructions
