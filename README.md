@@ -6,7 +6,7 @@ tested. Use at your own risk!
 ## What is this?
 
 Weather-pi is an experiment in collecting data from an Acurite 5-in-1 weather station.
-The code is peimarily written in Kotlin and submits the weather observations to
+The code is primarily written in Kotlin and submits the weather observations to
 an InfluxDB database. Data is received using an USB software defined radio (SDR)
 receiver using [rtl_433](https://github.com/merbanan/rtl_433). Currently it has only 
 been tested with protocol 40, but should be able to be adapted to others if needed.
